@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateProgramFile>false</GenerateProgramFile>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="appSettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="sharpinoSettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="Commons.fs" />
+    <Compile Include="Counters/Counter.fs" />
+    <Compile Include="Counters/Events.fs" />
+    <Compile Include="Counters/Commands.fs" />
+    <Compile Include="CounterContext/CounterContext.fs" />
+    <Compile Include="CounterContext/Events.fs" />
+    <Compile Include="CounterContext/Commands.fs" />
+
+    <Compile Include="CounterApi.fs" />
+    <Compile Include="TestUtils.fs" />
+    <Compile Include="Tests.fs" />
+    <!-- <Compile Include="KafkaImplementationTests.fs" /> -->
+    <Compile Include="TestRunner.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Sharpino" Version="2.5.5" />
+  </ItemGroup>
+
+  <!-- <ItemGroup>
+    <ProjectReference Include="..\..\realsharpino\Sharpino\Sharpino.Lib\Sharpino.Lib.fsproj" />
+  </ItemGroup> -->
+
+</Project>
