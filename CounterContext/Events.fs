@@ -14,7 +14,7 @@ module CounterContextEvents =
 
     type CounterCountextEvents =
         | CounterAdded of CounterReference
-        | CounterRemoved of CounterReference
+        | CounterRemoved of Guid
             interface Event<CounterContext> with
                 member this.Process (counter: CounterContext) =
                     match this with

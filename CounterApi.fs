@@ -40,11 +40,10 @@ module SharpinoCounterApi =
                 return counter
             }
             
-            
         member this.GetCounterReferences () =
             result {
                 let! (_, counterContext) = counterContextStateViewer ()
-                return counterContext.CountersReferences.Items
+                return counterContext.CountersReferences.GetAll()
             }
 
         member this.Increment (counterId: System.Guid) =
@@ -87,13 +86,13 @@ module SharpinoCounterApi =
                     Clear (Int x)
                     |> runAggregateCommand<Counter, CounterEvents, string> counterId storage eventBroker
             }        
-
-        member this.RemoveCounter (counterReference: CounterReference) =
+            
+        member this.RemoveCounter (id: Guid) =
             result {
-                let! (_, counter) = counterViewer counterReference.CounterId
-                let deactivated = Deactivate |> runAggregateCommand<Counter, CounterEvents, string> counterReference.CounterId storage eventBroker
+                let! (_, counter) = counterViewer id
+                let deactivated = Deactivate |> runAggregateCommand<Counter, CounterEvents, string> id storage eventBroker
                 return! 
-                    RemoveCounterReference counterReference
+                    RemoveCounterReference id
                     |> runCommand<CounterContext, CounterCountextEvents, string> storage eventBroker
             }
 

@@ -13,7 +13,7 @@ open SharpinoCounter.CounterContextEvents
 module CounterContextCommands =
     type CounterContextCommands =
         | AddCounterReference of CounterReference
-        | RemoveCounterReference of CounterReference
+        | RemoveCounterReference of Guid
             interface Command<CounterContext, CounterCountextEvents> with
                 member this.Execute (counter: CounterContext) =
                     match this with

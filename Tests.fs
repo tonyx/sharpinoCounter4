@@ -175,6 +175,28 @@ let tests =
             // then
             Expect.isError counterRetrieved "should be error"
 
+        multipleTestCase "cannot add two counters with the same name - Error" testConfigs <| fun (api, eventStore) ->
+            Setup eventStore
+            // given
+            let counterReference: CounterReference =
+                {
+                    CounterName = "counter"
+                    CounterId = Guid.NewGuid ()
+                }
+            let newCounterReference: CounterReference =
+                {
+                    CounterName = "counter"
+                    CounterId = Guid.NewGuid ()
+                }
+            let counterApi = api ()
+            let _ = counterApi.AddCounter counterReference
+
+            // when
+            let readded = counterApi.AddCounter newCounterReference
+
+            // then
+            Expect.isError readded "should be error"
+        
         multipleTestCase "add two counters - Ok" testConfigs <| fun (api, eventStore) -> 
             Setup eventStore
             // given
@@ -197,7 +219,8 @@ let tests =
 
             // then
             Expect.isOk counterReferences  "should be ok"
-            Expect.equal counterReferences.OkValue [counterReference; newCounterId2] "should be empty"
+            let okValue = counterReferences.OkValue
+            Expect.equal (okValue |> Set.ofList) ([counterReference; newCounterId2] |> Set.ofList) "should be empty"
 
         multipleTestCase "add two counters and increment them independently - Ok" testConfigs <| fun (api, eventStore) ->
             Setup eventStore
@@ -331,7 +354,7 @@ let tests =
             Expect.equal retrieved.OkValue [newCounterId] "should be equal"
 
             // when
-            let removeCounter = counterApi.RemoveCounter newCounterId
+            let removeCounter = counterApi.RemoveCounter newCounterId.CounterId
             // 
             Expect.isOk removeCounter "should be ok"
             let counters = counterApi.GetCounterReferences ()
@@ -380,7 +403,7 @@ let tests =
             let counterApi = api ()
             let added = counterApi.AddCounter newCounterId
             Expect.isOk added "should be ok"
-            let removed = counterApi.RemoveCounter newCounterId
+            let removed = counterApi.RemoveCounter newCounterId.CounterId
             Expect.isOk removed "should be ok"
 
             // when

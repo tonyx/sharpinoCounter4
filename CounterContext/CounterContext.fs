@@ -20,31 +20,27 @@ module CounterContext =
         interface Entity with
             member this.Id = this.CounterId
     
-    type CounterContext(state: int, counterRefs: List<CounterReference>) =
+    type CounterContext(state: int, counterRefs: IRepository<CounterReference>) =
 
-        member this.CountersReferences = ListRepository<CounterReference>.Create counterRefs
+        member this.CountersReferences = counterRefs
 
         member this.AddCounterReference (counterReference: CounterReference) = 
             result {
-                do!
-                    counterRefs
-                    |> List.exists (fun (x: CounterReference) -> x.CounterId = counterReference.CounterId || x.CounterName = counterReference.CounterName)
-                    |> not
-                    |> Result.ofBool "counter already exists"
-                return CounterContext (state, counterRefs @ [counterReference]) 
+                let! newRepo =
+                    this.CountersReferences.AddWithPredicate (counterReference, (fun (x: CounterReference) -> x.CounterName = counterReference.CounterName), "counter already exists")
+                return CounterContext (state, newRepo) 
             }
-        member this.RemoveCounterReference (counterReference: CounterReference) =
+       
+        member this.RemoveCounterReference (id: Guid) =
             result {
-                do! 
-                    counterRefs |> List.exists (fun x -> x = counterReference)
-                    |> Result.ofBool "counter does not exist"
-                return CounterContext (state, counterRefs |> List.filter (fun x -> x <> counterReference))
-            }
+                let! newRepo = this.CountersReferences.Remove id "counter does not exist"
+                return CounterContext (state, newRepo)
+            }     
          
         member this.GetCounterReference (id: Guid) =
             result {
                 let! result =
-                    counterRefs |> List.tryFind (fun x -> x.CounterId = id)
+                    this.CountersReferences.Get id
                     |> Result.ofOption "counter not found"
                 return result     
             }
@@ -52,14 +48,14 @@ module CounterContext =
         member this.GetCounterReference (name: string) =
             result {
                 let! result =
-                    counterRefs |> List.tryFind (fun x -> x.CounterName = name)
+                    this.CountersReferences.Find (fun x -> x.CounterName = name)
                     |> Result.ofOption "counter not found"
                 return result    
             }
         
         member this.State = state
 
-        static member Zero = CounterContext (0, []) 
+        static member Zero = CounterContext (0, ListRepository.Zero) 
         static member StorageName = "_countercontext"
         static member Version = "_01"
         static member SnapshotsInterval = 15
