@@ -12,15 +12,15 @@ open SharpinoCounter.CounterContextEvents
 
 module CounterContextCommands =
     type CounterContextCommands =
-        | AddCounterReference of Guid
-        | RemoveCounterReference of Guid
+        | AddCounterReference of CounterReference
+        | RemoveCounterReference of CounterReference
             interface Command<CounterContext, CounterCountextEvents> with
                 member this.Execute (counter: CounterContext) =
                     match this with
                     | AddCounterReference id ->
-                        counter.AddCounter id
+                        counter.AddCounterReference id
                         |> Result.map (fun s -> (s, [CounterAdded id]))
                     | RemoveCounterReference id ->
-                        counter.RemoveCounter id
+                        counter.RemoveCounterReference id
                         |> Result.map (fun s -> (s,[CounterRemoved id]))
                 member this.Undoer = None

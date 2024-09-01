@@ -12,7 +12,9 @@ open SharpinoCounter.Counter
 type CounterCommands =
     | Clear of IntOrUnit
     | Increment 
-    | Decrement 
+    | Decrement
+    | Activate
+    | Deactivate
         interface AggregateCommand<Counter, CounterEvents> with
             member this.Execute (counter: Counter):  Result<Counter*List<CounterEvents>, string> =
                 match this with
@@ -26,6 +28,12 @@ type CounterCommands =
                     counter.Increment ()
                     |> Result.map (fun s -> (s, [Incremented]))
                 | Decrement  ->
-                    counter.Decrement()
+                    counter.Decrement ()
                     |> Result.map (fun s -> (s, [Decremented]))
+                | Activate ->
+                    counter.Activate ()
+                    |> Result.map (fun s -> (s, [Activated]))
+                | Deactivate ->
+                    counter.Deactivate ()
+                    |> Result.map (fun s -> (s, [Deactivated]))
             member this.Undoer = None

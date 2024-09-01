@@ -1,4 +1,5 @@
 namespace SharpinoCounter
+open System
 open FsToolkit.ErrorHandling
 open Sharpino.CommandHandler
 
@@ -13,43 +14,87 @@ module SharpinoCounterApi =
 
     type SharpinoCounterApi (storage: IEventStore<string>, eventBroker: IEventBroker<string>, counterContextStateViewer: StateViewer<CounterContext>, counterViewer: AggregateViewer<Counter>) =
 
-        member this.AddCounter counterId =
-            let counter = Counter (counterId, 0)
+        member this.AddCounter (counterReference: CounterReference) =
+            let counter = Counter (counterReference.CounterId, 0)
             result {
                 return!  
-                    AddCounterReference counterId
+                    AddCounterReference counterReference
                     |> this.RunInitAndCommand counter 
             }
 
-        member this.GetCounter counterId =
-            counterViewer counterId
-            |> Result.map (fun (_, counter) -> counter)
-
-        member this.GetCounterReferences () =
-            counterContextStateViewer ()
-            |> Result.map (fun (_, state) -> state.CountersReferences)
-
-        member this.Increment counterId =
-            Increment
-            |> runAggregateCommand<Counter, CounterEvents, string> counterId storage eventBroker 
-
-        member this.Decrement counterId =
-            Decrement 
-            |> this.RunAggregateCommand counterId
-
-        member this.ClearCounter counterId =
-            Clear Unit
-            |> this.RunAggregateCommand counterId
-
-        member this.ClearCounter (counterId,  x) =
-            Clear (Int x)
-            |> this.RunAggregateCommand counterId
-
-        member this.RemoveCounter counterId =
+        member this.GetCounter (counterId: System.Guid) =
             result {
+                let! (_, counterContext) = counterContextStateViewer ()
+                let! counterExists =
+                    counterContext.GetCounterReference counterId
+                let! (_, counter) = counterViewer counterId
+                return counter
+            }
+            
+        member this.GetCounter (counterName: string) =
+            result {
+                let! (_, counterContext) = counterContextStateViewer ()
+                let! counterReference =
+                    counterContext.GetCounterReference counterName
+                let! (_, counter) = counterViewer counterReference.CounterId
+                return counter
+            }
+            
+            
+        member this.GetCounterReferences () =
+            result {
+                let! (_, counterContext) = counterContextStateViewer ()
+                return counterContext.CountersReferences.Items
+            }
+
+        member this.Increment (counterId: System.Guid) =
+            result {
+                let! (_, counterContext) = counterContextStateViewer ()
+                let! counterReference =
+                    counterContext.GetCounterReference counterId
+                return!
+                    Increment
+                    |> runAggregateCommand<Counter, CounterEvents, string> counterId storage eventBroker
+            }    
+
+        member this.Decrement (counterId: System.Guid) =
+            result {
+                let! (_, counterContext) = counterContextStateViewer ()
+                let! counterReference =
+                    counterContext.GetCounterReference counterId
+                
+                return!
+                    Decrement 
+                    |> runAggregateCommand<Counter, CounterEvents, string> counterId storage eventBroker
+            }
+
+        member this.ClearCounter (counterId: Guid) =
+            result {
+                let! (_, counterContext) = counterContextStateViewer ()
+                let! counterReference =
+                    counterContext.GetCounterReference counterId
+                return!
+                    Clear Unit
+                    |> runAggregateCommand<Counter, CounterEvents, string> counterId storage eventBroker
+            }
+
+        member this.ClearCounter (counterId: Guid,  x) =
+            result {
+                let! (_, counterContext) = counterContextStateViewer ()
+                let! counterReference =
+                    counterContext.GetCounterReference counterId
+                return!
+                    Clear (Int x)
+                    |> runAggregateCommand<Counter, CounterEvents, string> counterId storage eventBroker
+            }        
+
+        member this.RemoveCounter (counterReference: CounterReference) =
+            result {
+                let! (_, counter) = counterViewer counterReference.CounterId
+                let deactivated = Deactivate |> runAggregateCommand<Counter, CounterEvents, string> counterReference.CounterId storage eventBroker
                 return! 
-                    RemoveCounterReference counterId
-                    |> this.RunCounterContextCommand
+                    RemoveCounterReference counterReference
+                    |> runCommand<CounterContext, CounterCountextEvents, string> storage eventBroker
             }
 
         member private this.RunInitAndCommand counter cmd =

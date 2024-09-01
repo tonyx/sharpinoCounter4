@@ -10,22 +10,29 @@ open Sharpino.Utils
 
 module Counter =
     open Sharpino.Core
-    open Sharpino.Lib.Core.Commons
-    type Counter(id: Guid, value: int) =
-        member this.Clear () = Counter (this.Id, 0) |> Ok
-        member this.Clear value  = Counter (this.Id, value) |> Ok
+    type Counter private (id: Guid, value: int, active: bool) =
+        new (id: Guid, value: int) = Counter (id, value, true)
 
         member this.Id = id
-
         member this.State = value
+        member this.IsActive = active
 
+        member this.Clear () = Counter (this.Id, 0, active) |> Ok
+        member this.Clear value  = Counter (this.Id, value,  active) |> Ok
+        
+        member this.Deactivate () =
+            Counter (this.Id, this.State, false) |> Ok
+            
+        member this.Activate () =
+            Counter (this.Id, this.State, true) |> Ok
+        
         member this.Increment () =
             result 
                 {
                     do! 
                         this.State < 99
                         |> Result.ofBool "must be lower than 99"
-                    return Counter (this.Id, this.State + 1)
+                    return Counter (this.Id, this.State + 1, active)
                 }
 
         member this.Decrement () =
@@ -34,7 +41,7 @@ module Counter =
                     do!
                         this.State > 0
                         |> Result.ofBool "must be greater than 0"
-                    return Counter (this.Id, this.State - 1)
+                    return Counter (this.Id, this.State - 1, active)
                 }
 
         member this.Serialize  =
@@ -52,6 +59,3 @@ module Counter =
             member this.Id = this.Id
             member this.Serialize  =
                 this.Serialize 
-
-
-

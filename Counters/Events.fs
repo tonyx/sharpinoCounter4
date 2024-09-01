@@ -17,7 +17,9 @@ type IntOrUnit =
 type CounterEvents =
     | Cleared of IntOrUnit 
     | Incremented 
-    | Decremented 
+    | Decremented
+    | Activated
+    | Deactivated
         interface Event<Counter> with
             member this.Process (counter: Counter) =
                 match this with
@@ -25,6 +27,9 @@ type CounterEvents =
                 | Cleared (Int x)  -> counter.Clear x
                 | Incremented  -> counter.Increment ()
                 | Decremented  -> counter.Decrement ()
+                | Activated  -> counter.Activate ()
+                | Deactivated  -> counter.Deactivate ()
+                 
         static member Deserialize (json: Json) =
             globalSerializer.Deserialize<CounterEvents> json
         member this.Serialize =
