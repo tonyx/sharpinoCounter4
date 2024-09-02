@@ -12,7 +12,11 @@ open SharpinoCounter.Counter
 
 module SharpinoCounterApi =
 
-    type SharpinoCounterApi (storage: IEventStore<string>, eventBroker: IEventBroker<string>, counterContextStateViewer: StateViewer<CounterContext>, counterViewer: AggregateViewer<Counter>) =
+    type SharpinoCounterApi
+        (storage: IEventStore<string>,
+         eventBroker: IEventBroker<string>,
+         counterContextStateViewer: StateViewer<CounterContext>,
+         counterViewer: AggregateViewer<Counter>) =
 
         member this.AddCounter (counterReference: CounterReference) =
             let counter = Counter (counterReference.CounterId, 0)

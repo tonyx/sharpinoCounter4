@@ -99,6 +99,16 @@ CREATE TABLE public.aggregate_events_01_counter (
 
 
 --
+-- Name: counterreference_repository; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.counterreference_repository (
+    id uuid NOT NULL,
+    item jsonb NOT NULL
+);
+
+
+--
 -- Name: events_01_counter; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -218,6 +228,14 @@ ALTER TABLE ONLY public.aggregate_events_01_counter
 
 
 --
+-- Name: counterreference_repository counterreference_repository_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.counterreference_repository
+    ADD CONSTRAINT counterreference_repository_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: events_01_counter events_counter_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -294,4 +312,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20240328125544'),
     ('20240328142748'),
     ('20240401090739'),
-    ('20240401091105');
+    ('20240401091105'),
+    ('20240901094503');

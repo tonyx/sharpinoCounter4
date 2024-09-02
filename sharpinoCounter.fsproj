@@ -26,12 +26,12 @@
     <Compile Include="TestRunner.fs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Sharpino" Version="2.5.5" />
-  </ItemGroup>
-
 <!--  <ItemGroup>-->
-<!--    <ProjectReference Include="..\..\..\realsharpino\Sharpino\Sharpino.Lib\Sharpino.Lib.fsproj" />-->
-<!--  </ItemGroup> -->
+<!--    <PackageReference Include="Sharpino" Version="2.5.5" />-->
+<!--  </ItemGroup>-->
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\realsharpino\Sharpino\Sharpino.Lib\Sharpino.Lib.fsproj" />
+  </ItemGroup> 
 
 </Project>

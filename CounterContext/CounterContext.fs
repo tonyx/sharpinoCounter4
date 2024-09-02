@@ -2,6 +2,7 @@
 namespace SharpinoCounter
 open Sharpino.Lib.Core.Commons
 open Sharpino.Repositories
+open Sharpino.PgRepository
 open SharpinoCounter.Commons
 open System
 open Sharpino
@@ -17,8 +18,13 @@ module CounterContext =
             CounterName: string
             CounterId: Guid
         }
-        interface Entity with
+        interface JsonSerializableEntity with
             member this.Id = this.CounterId
+            member this.Serialize =
+                globalSerializer.Serialize this
+                
+        static member Deserialize x =
+            x |> globalSerializer.Serialize
     
     type CounterContext(state: int, counterRefs: IRepository<CounterReference>) =
 
